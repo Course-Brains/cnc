@@ -4,8 +4,6 @@ class Player {
     }
 }
 // Field id definition
-const Field_housing_cap = 0
-const Field_resource_cap = 1
 const Fields = {
     housing_cap: 0,
     resource_cap: 1,
@@ -23,14 +21,15 @@ function field_id_to_field(id) {
 }
 class City {
     constructor() {
-        this.name = ""
-        this.pop = 0
-        this.housing_cap = 1
-        this.buildings = []
-        this.structures = []
-        this.resources = []
-        this.resource_cap = 0
-        this.tiles = []
+        this.name = "" // name of the city
+        // List of races(id) and their population
+        this.pop = [/*[id, amount]*/]
+        this.housing_cap = 1 // max number of people housed
+        this.buildings = [/*extends Building*/]
+        this.structures = [/*Structure*/]
+        this.resources = [/*Resource*/]
+        this.resource_cap = 0 // max number of resources stored
+        this.tiles = [/*id*/]
     }
     check() {
         // Checks if there is enough pop for each building
@@ -97,8 +96,39 @@ class City {
             }
         }
     }
+    gen_current_race_stats() {
+        let highest_id = 0
+        let highest_pop = 0
+        this.pop.forEach((item) => {
+            if (item[1] > highest_pop) {
+                highest_pop = item[1]
+                highest_id = item[0]
+            }
+        })
+        race_id_to_race_stats(highest_id)
+    }
 }
-// Buildings need to be classes because
+const Races = {
+    homo_erectus: 0,
+    human: 1,
+}
+function name_to_race_id(name) {
+    switch (name) {
+        case "homo_erectus": 0
+        case "human": 1
+    }
+}
+function race_id_to_race_stats(id) {
+    switch (race_id) {
+        case 0: 
+    }
+}
+class RaceEffect {
+    constructor() {
+
+    }
+}
+// Buildings need to be class instances because
 // they have to store how many people are
 // working there.
 class Building {
@@ -161,10 +191,14 @@ class Resource {
         this.num = num
     }
 }
+// Biome ids:
+// 1: wetland("wet")
+// 2: tropical rainforest("trop_rain")
+// 3: tropical seasonal rainforest("trop_seas_rain")/tropical seasonal forest("trop_seas_for")
 class Tile {
     constructor(type) {
         switch (type) {
-            case "wet":
+            case "wet"|0:
                 this.food_forg = 5
                 this.food_fish = 5
                 this.food_hunt = 2
@@ -172,7 +206,7 @@ class Tile {
                 this.stone = 0
                 this.straw = 1
                 this.bone = 1
-            case "trop_rain":
+            case "trop_rain"|1:
                 this.food_forg = 2
                 this.food_fish = 1
                 this.food_hunt = 3
@@ -180,7 +214,7 @@ class Tile {
                 this.stone = 0
                 this.straw = 2
                 this.bone = 2
-            case "trop_seas_rain"|"trop_seas_for":
+            case "trop_seas_rain"|3|"trop_seas_for":
                 this.food_forg = 3
                 this.food_fish = 1
                 this.food_hunt = 4
@@ -188,7 +222,7 @@ class Tile {
                 this.stone = 0
                 this.straw = 3
                 this.bone = 3
-            case "temp_deci_rain":
+            case "temp_deci_rain"|4:
                 this.food_forg = 2
                 this.food_fish = 0
                 this.food_hunt = 4
@@ -262,7 +296,7 @@ class Tile {
 const Structure_storage = new Structure({
     name: "storage",
     changes: [
-        new FieldChange(Field_resource_cap, 100)
+        new FieldChange(Fields.resource_cap, 100)
     ],
     cost: [
         //TODO: Set construction cost
