@@ -24,9 +24,11 @@ class City {
         this.name = "" // name of the city
         // List of races(id) and their population
         this.pop = [/*[id, amount]*/]
+        this.highest_race = 0// race id
         this.housing_cap = 1 // max number of people housed
         this.buildings = [/*extends Building*/]
         this.structures = [/*Structure*/]
+        this.raw_resources = [/*Structure*/]
         this.resources = [/*Resource*/]
         this.resource_cap = 0 // max number of resources stored
         this.tiles = [/*id*/]
@@ -48,6 +50,8 @@ class City {
                 return false
             }
         })
+        // Needs to be updated to have accurate resource values
+        this.update_highest_race()
         // Building resource potential storage check
         let total = this.calc_total_resource
         this.buildings.forEach((building) => {
@@ -78,8 +82,15 @@ class City {
         }
     }
     buildings_tick() {
+        let mult = this.gen_current_race_stats().prod_mult
         this.buildings.forEach((building) => {
-            building.tick(this)
+            building.tick(this, mult)
+        })
+    }
+    raw_resource_tick() {
+        let mult = this.gen_current_race_stats().res_mult
+        this.raw_resources.forEach((resource) => {
+            resource.tick(this, mult)
         })
     }
     calc_total_resource() {
@@ -96,7 +107,7 @@ class City {
             }
         }
     }
-    gen_current_race_stats() {
+    update_highest_race() {
         let highest_id = 0
         let highest_pop = 0
         this.pop.forEach((item) => {
@@ -105,7 +116,10 @@ class City {
                 highest_id = item[0]
             }
         })
-        race_id_to_race_stats(highest_id)
+        this.highest_race = highest_race
+    }
+    gen_current_race_stats() {
+        race_id_to_race_stats(this.highest_id)
     }
 }
 const Races = {
@@ -120,12 +134,33 @@ function name_to_race_id(name) {
 }
 function race_id_to_race_stats(id) {
     switch (race_id) {
-        case 0: 
+        case 1:  new RaceEffect().res_mult(1.25)
     }
 }
 class RaceEffect {
+    //0) Resource mult
+        // mult
+    //1) Prod mult
+        // mult
+    //2) Special actions
+    //3) Passive stat gains
+        // which stat
+        // amount gained
     constructor() {
-
+        this.res_mult = 1 // both need to be 1 by default so that there is no change
+        this.prod_mult = 1
+        this.spec_act = [] // Unimplemented
+        this.stat = [] // Unimplemented
+    }
+    // Remember to return itself after modifying the values so that
+    // they can be chained: new RaceEffect().res_mult(1.5).prod_mult(0.5)
+    res_mult(value) {
+        this.res_mult = value
+        this
+    }
+    prod_mult(value) {
+        this.prod_mult = value
+        this
     }
 }
 // Buildings need to be class instances because
@@ -136,19 +171,19 @@ class Building {
         // Building name
         this.name = ""
         // The produced resources per 1 worker
-        this.prod = []
+        this.prod = [/*Resource*/]
         // The consumed resources per 1 worker
-        this.cons = []
+        this.cons = [/*Resource*/]
         // Number of workers
         this.pop = 0
         // Construction cost
-        this.cost = []
+        this.cost = [/*Resource*/]
     }
-    tick(city) {
+    tick(city, mult) {
         // Adding production to city resource
         this.prod.forEach((prod) => {
             let index = city.find_resource_index(prod.name)
-            city.resources[index].num += (prod.num*this.pop)
+            city.resources[index].num += (prod.num*this.pop*mult)
         })
         // Subtracting consumption from city resource
         this.cons.forEach((cons) => {
@@ -195,6 +230,7 @@ class Resource {
 // 1: wetland("wet")
 // 2: tropical rainforest("trop_rain")
 // 3: tropical seasonal rainforest("trop_seas_rain")/tropical seasonal forest("trop_seas_for")
+// TODO: fill out the rest of the names
 class Tile {
     constructor(type) {
         switch (type) {
