@@ -24,7 +24,7 @@ class City {
         this.name = "" // name of the city
         // List of races(id) and their population
         this.pop = [/*[id, amount]*/]
-        this.highest_race = 0// race id
+        this.highest_race = 0 // race id
         this.housing_cap = 1 // max number of people housed
         this.buildings = [/*extends Building*/]
         this.structures = [/*Structure*/]
@@ -116,7 +116,7 @@ class City {
                 highest_id = item[0]
             }
         })
-        this.highest_race = highest_race
+        this.highest_race = highest_id
     }
     gen_current_race_stats() {
         race_id_to_race_stats(this.highest_id)
@@ -133,8 +133,9 @@ function name_to_race_id(name) {
     }
 }
 function race_id_to_race_stats(id) {
-    switch (race_id) {
-        case 1:  new RaceEffect().res_mult(1.25)
+    switch (id) {
+        case 0: return new RaceEffect()
+        case 1: return new RaceEffect().set_res_mult(1.25)
     }
 }
 class RaceEffect {
@@ -153,14 +154,14 @@ class RaceEffect {
         this.stat = [] // Unimplemented
     }
     // Remember to return itself after modifying the values so that
-    // they can be chained: new RaceEffect().res_mult(1.5).prod_mult(0.5)
-    res_mult(value) {
+    // they can be chained: new RaceEffect().set_res_mult(1.5).set_prod_mult(0.5)
+    set_res_mult(value) {
         this.res_mult = value
-        this
+        return this
     }
-    prod_mult(value) {
+    set_prod_mult(value) {
         this.prod_mult = value
-        this
+        return this
     }
 }
 // Buildings need to be class instances because
@@ -328,7 +329,7 @@ class Tile {
     }
 }
 // Structures must be defined down here because
-// they need to be after class definitions
+// they need to be made after class definitions
 const Structure_storage = new Structure({
     name: "storage",
     changes: [
