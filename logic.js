@@ -1,6 +1,6 @@
 class Player {
     constructor() {
-        this.cities = []
+        this.cities = [/*City*/]
     }
 }
 // Field id definition
@@ -24,6 +24,7 @@ class City {
         this.name = "" // name of the city
         // List of races(id) and their population
         this.pop = [/*[id, amount]*/]
+        this.shamans = [/*Shaman*/]
         this.highest_race = 0 // race id
         this.housing_cap = 1 // max number of people housed
         this.buildings = [/*extends Building*/]
@@ -52,11 +53,17 @@ class City {
         })
         // Needs to be updated to have accurate resource values
         this.update_highest_race()
+        let race = this.gen_current_race_stats()
         // Building resource potential storage check
         let total = this.calc_total_resource
         this.buildings.forEach((building) => {
             building.prod.forEach((prod) => {
-                total += (prod.num*building.pop)
+                total += (prod.num*building.pop*race.prod_mult)
+            })
+        })
+        this.raw_resources.forEach((resource) => {
+            resource.prod.forEach((prod) => {
+                total += (prod.num*resource.pop*race.res_mult)
             })
         })
         if (total > this.resource_cap) {
@@ -79,6 +86,7 @@ class City {
     tick() {
         if (this.check()) {
             this.buildings_tick()
+            this.raw_resource_tick()
         }
     }
     buildings_tick() {
@@ -120,6 +128,17 @@ class City {
     }
     gen_current_race_stats() {
         race_id_to_race_stats(this.highest_id)
+    }
+}
+class Shaman {
+    constructor() {
+        this.name = ""
+        this.raceid = 0 // Race id
+        this.xp = 0
+        this.req_xp = 0
+        this.mana = 0
+        this.lvl = 0
+        this.school = 0 // School id
     }
 }
 const Races = {
